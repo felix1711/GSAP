@@ -1,47 +1,58 @@
-// gsap.from("#part2",{
-//     // opacity:0,
-//     scaleX:0,
-//     duration:1,
-//     delay:1,
-//     ease: "power2.inOut",
-//     repeat:1,
-//     yoyo:true,
-// })
-// gsap.from("#part1",{
-//     // opacity:0,
-//     scaleX:0,
-//     duration:1,
-//     delay:1,
-//     ease: "power2.inOut",
-//     repeat:1,
-//     yoyo:true,
-// })
-
 const squares = document.querySelectorAll('.square');
-const numSquares = squares.length;
 let currentIndex = 0;
+let isFirstRun = true;
 
-const tl = gsap.timeline({ paused: true });
+squares[currentIndex].style.backgroundColor = 'black';
+document.querySelector("#part1").style.width = '0';
+document.querySelector("#part2").style.width = '0';
 
 function animateSquare() {
-  var currentSquare = squares[currentIndex];
+  const currentSquare = squares[currentIndex];
+  const nextIndex = (currentIndex + 1) % 3; 
+  const heading = document.querySelector("#para h1");
+  
+  const tl = gsap.timeline({
+    onComplete: () => {
+      currentIndex = nextIndex; 
+      setTimeout(animateSquare, 3000);
+    }
+  });
 
-  tl.clear();
-  tl.to(currentSquare, { backgroundColor: 'black' }, 1) // Adjust duration as needed
-    .from(["#part1", "#part2"], {
-      // opacity: 0, // Uncomment if you want opacity animation
+  const scaleUpDuration = isFirstRun ? 0 : 1;
+
+  tl.to(["#part1", "#part2"], {
+      width: '50%', 
+      duration: scaleUpDuration,
+      ease: "power2.inOut",
+    })
+    .add(() => {
+      currentSquare.style.backgroundColor = 'black';
+    })
+    .to(["#part1", "#part2"], {
+      scaleX: 1,
+      duration: 0,
+    })
+    .add(() => {
+      if (currentIndex === 0) {
+        heading.innerHTML = "Hello Simmi, get well soon!";
+      } else if (currentIndex === 1) {
+        heading.innerHTML = "Hello Aaina, get up soon!";
+      } else if (currentIndex === 2) {
+        heading.innerHTML = "Hello Swaraj, how are you doing?";
+      } 
+    })
+    .to(["#part1", "#part2"], {
       scaleX: 0,
       duration: 1,
       ease: "power2.inOut",
-      repeat: 1,
-      yoyo: true,
-    })
-    .to(currentSquare, { backgroundColor: 'transparent' }, 1); // Adjust duration as needed
+      onStart: () => {
+        squares[nextIndex].style.backgroundColor = 'black'; 
+        currentSquare.style.backgroundColor = 'transparent'; 
+      }
+    });
 
-  currentIndex = (currentIndex + 1) % numSquares;
-  tl.restart();
+  isFirstRun = false;
 }
 
-animateSquare(); // Start the initial animation
-setInterval(animateSquare, 5000); // Repeat every 5 seconds
+setTimeout(animateSquare, 3000);
 
